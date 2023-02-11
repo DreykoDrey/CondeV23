@@ -1,7 +1,10 @@
+
 const mysql = require('mysql');
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+
+const Swal = require('sweetalert2');
 
 //creando la conexion a la base de datos
 const connection = mysql.createConnection({
@@ -16,7 +19,8 @@ const app = express();
 
 //seteando los default de las rutas, setea views como default de carpeta y el engine para leer la extension ejs
 app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html')
 
 //encripta los datos 
 app.use(session({
@@ -32,7 +36,8 @@ app.use(express.static(path.join(__dirname, 'static')));
 // http://localhost:3000/   - - - -Redirecciona a login cuando se abre la pagina 
 app.get('/', function(request, response) {
 	// Render login template
-	response.sendFile(path.join(__dirname + '/login.html'));
+	response.sendFile(path.join(__dirname + '/views/login.html'));
+	
 });
 
 // http://localhost:3000/auth - - - - - un point que se usa solo para la comprobacion de datos, no tiene html como tal 
@@ -56,6 +61,9 @@ app.post('/auth', function(request, response) {
 				// Redirecciona al point home
 				response.redirect('/home');
 			} else {
+				Swal.fire({
+					title: "welcome"
+				});
 				response.send('Usuario o contraseña incorrectos');
 			}			
 			response.end();
@@ -71,6 +79,7 @@ app.get('/home', function(request, response) {
 	// Si el usuario esta logueado
 	if (request.session.loggedin) {
 		// renderiza la pagina panelcontrol que esta en views
+	
 	    response.render('panelcontrol');
 	} else {
 		// si no esta logueado 
